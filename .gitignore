@@ -1,0 +1,16 @@
+# Antigravity / Agent Workspace
+.agents/
+.gemini/
+
+# Environment & Credentials
+.env
+config.local.php
+
+# Web Server & System Files
+*.log
+error_log
+.DS_Store
+Thumbs.db
+
+# Dependencies (jika nanti pakai Composer)
+/vendor/
