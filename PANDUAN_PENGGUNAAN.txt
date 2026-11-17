@@ -1,0 +1,21 @@
+PANDUAN PENGGUNAAN SKILL DI ANTIGRAVITY IDE (PROYEK FINANCIAL MANAGEMENT - XAMPP)
+=================================================================================
+
+Di dalam paket ZIP ini terdapat 2 folder yang berisi 4 skill terpisah:
+
+1. Folder `.agent/skills/` (Cara Otomatis - Paling Direkomendasikan)
+   - Salin folder `.agent` ke dalam folder utama proyek Anda di XAMPP, misalnya:
+     `C:\xampp\htdocs\financial-management\.agent\skills\`
+   - Antigravity IDE akan otomatis membaca keempat folder skill di dalamnya:
+     * 01-ui-ux-dashboard/SKILL.md
+     * 02-logika-finansial-kalkulator/SKILL.md
+     * 03-edukasi-interaktif-edtech/SKILL.md
+     * 04-backend-database-xampp/SKILL.md
+
+2. Folder `skills-terpisah/` (Cara Panggil Manual / Copy-Paste)
+   - Berisi 4 file Markdown (.md) yang bisa Anda buka satu per satu:
+     * 01-skill-ui-ux-dashboard.md
+     * 02-skill-logika-finansial-kalkulator.md
+     * 03-skill-edukasi-interaktif.md
+     * 04-skill-backend-xampp.md
+   - Anda bisa meletakkan folder `skills-terpisah` di proyek Anda lalu memanggilnya di chat Antigravity menggunakan simbol `@` (contoh: `@01-skill-ui-ux-dashboard.md`), atau menyalin isinya ke menu Custom Rules/Skills di Antigravity IDE.

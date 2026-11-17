@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Masuk / Daftar - Financial Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen bg-slate-900 flex items-center justify-center p-4">
+    <div class="max-w-4xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-5">
+        
+        <!-- Kolom Kiri: Branding & Informasi Edukasi -->
+        <div class="md:col-span-2 bg-gradient-to-br from-emerald-600 via-emerald-700 to-slate-900 text-white p-8 flex flex-col justify-between">
+            <div>
+                <div class="flex items-center gap-3">
+                    <div class="w-11 h-11 rounded-2xl bg-white/20 backdrop-blur flex items-center justify-center font-black text-xl">
+                        FM
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg leading-tight">Financial Management</h1>
+                        <p class="text-xs text-emerald-100">Smart Cashflow & EdTech</p>
+                    </div>
+                </div>
+
+                <h2 class="text-2xl font-extrabold mt-8 leading-snug">
+                    Kelola Uang, Capai Target Barang & Pelajari Finansial.
+                </h2>
+                <p class="text-xs text-emerald-100 mt-3 leading-relaxed">
+                    Dirancang dengan metode <strong>50/30/20</strong>, laporan multi-periode (Harian, Mingguan, Bulanan), kalkulator tabungan otomatis, serta kuis & simulasi interaktif.
+                </p>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/15 space-y-2 text-xs text-emerald-100">
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-300"></span>
+                    <span>Tabel <strong>users</strong> terintegrasi ERD MySQL XAMPP</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-300"></span>
+                    <span>Enkripsi <strong>password_hash (Bcrypt)</strong> & Role Akses</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Kolom Kanan: Form Login & Register -->
+        <div class="md:col-span-3 p-8 md:p-10 flex flex-col justify-center">
+            <!-- Switch Tab Login / Register -->
+            <div class="flex bg-slate-100 p-1.5 rounded-2xl mb-6">
+                <button id="tab-btn-login" onclick="switchAuthTab('login')" class="flex-1 py-2.5 text-xs md:text-sm font-bold rounded-xl bg-slate-900 text-white shadow transition">
+                    Masuk (Login)
+                </button>
+                <button id="tab-btn-register" onclick="switchAuthTab('register')" class="flex-1 py-2.5 text-xs md:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 transition">
+                    Daftar Akun (Register)
+                </button>
+            </div>
+
+            <!-- Alert Box -->
+            <div id="auth-alert" class="hidden mb-4 p-3.5 rounded-xl text-xs font-medium"></div>
+
+            <!-- FORM 1: LOGIN -->
+            <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Alamat Email</label>
+                    <input type="email" id="login-email" value="mahasiswa@financial.local" placeholder="nama@email.com" required
+                        class="w-full border border-slate-300 focus:border-emerald-600 focus:outline-none rounded-xl px-4 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+                    <input type="password" id="login-password" value="mahasiswa123" placeholder="••••••••" required
+                        class="w-full border border-slate-300 focus:border-emerald-600 focus:outline-none rounded-xl px-4 py-2.5 text-sm">
+                </div>
+
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-xl text-sm shadow-md transition">
+                    Masuk ke Dashboard &rarr;
+                </button>
+
+                <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-2">
+                    <span class="text-xs text-slate-500">Ingin mencoba langsung?</span>
+                    <button type="button" onclick="quickDemoLogin()" class="text-xs font-bold text-emerald-700 bg-emerald-50 hover:bg-emerald-100 px-3.5 py-2 rounded-lg transition">
+                        ⚡ Masuk Cepat Akun Demo Mahasiswa
+                    </button>
+                </div>
+            </form>
+
+            <!-- FORM 2: REGISTER (Sesuai atribut tabel `users`: nama, email, password_hash, role) -->
+            <form id="form-register" onsubmit="handleRegisterSubmit(event)" class="hidden space-y-3.5">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Nama Lengkap (`nama`)</label>
+                    <input type="text" id="reg-nama" placeholder="Contoh: Budi Santoso" required
+                        class="w-full border border-slate-300 focus:border-emerald-600 focus:outline-none rounded-xl px-4 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Alamat Email (`email` - UK)</label>
+                    <input type="email" id="reg-email" placeholder="budi@email.com" required
+                        class="w-full border border-slate-300 focus:border-emerald-600 focus:outline-none rounded-xl px-4 py-2.5 text-sm">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Password</label>
+                        <input type="password" id="reg-password" minlength="6" placeholder="Min. 6 karakter" required
+                            class="w-full border border-slate-300 focus:border-emerald-600 focus:outline-none rounded-xl px-4 py-2.5 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 mb-1">Peran (`role`)</label>
+                        <select id="reg-role" class="w-full border border-slate-300 focus:border-emerald-600 focus:outline-none rounded-xl px-3 py-2.5 text-sm">
+                            <option value="user" selected>User (Pengguna / Mahasiswa)</option>
+                            <option value="admin">Admin (Pengelola Modul)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl text-sm shadow-md transition">
+                    Buat Akun & Masuk &rarr;
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/dataService.js"></script>
+    <script>
+        function showAuthAlert(msg, isError = false) {
+            const box = document.getElementById('auth-alert');
+            box.classList.remove('hidden');
+            box.className = isError
+                ? 'mb-4 p-3.5 rounded-xl text-xs font-semibold bg-red-50 text-red-700 border border-red-200'
+                : 'mb-4 p-3.5 rounded-xl text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200';
+            box.textContent = msg;
+        }
+
+        function switchAuthTab(mode) {
+            document.getElementById('auth-alert').classList.add('hidden');
+            const loginForm = document.getElementById('form-login');
+            const regForm = document.getElementById('form-register');
+            const btnLogin = document.getElementById('tab-btn-login');
+            const btnReg = document.getElementById('tab-btn-register');
+
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                regForm.classList.add('hidden');
+                btnLogin.className = 'flex-1 py-2.5 text-xs md:text-sm font-bold rounded-xl bg-slate-900 text-white shadow transition';
+                btnReg.className = 'flex-1 py-2.5 text-xs md:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 transition';
+            } else {
+                loginForm.classList.add('hidden');
+                regForm.classList.remove('hidden');
+                btnReg.className = 'flex-1 py-2.5 text-xs md:text-sm font-bold rounded-xl bg-slate-900 text-white shadow transition';
+                btnLogin.className = 'flex-1 py-2.5 text-xs md:text-sm font-bold rounded-xl text-slate-600 hover:text-slate-900 transition';
+            }
+        }
+
+        async function handleLoginSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('login-email').value.trim();
+            const password = document.getElementById('login-password').value;
+
+            const result = await DataService.login(email, password);
+            if (result.success) {
+                showAuthAlert('Berhasil masuk! Mengalihkan ke Dashboard...', false);
+                setTimeout(() => { window.location.href = 'index.html'; }, 500);
+            } else {
+                showAuthAlert(result.message || 'Email atau password salah.', true);
+            }
+        }
+
+        async function handleRegisterSubmit(e) {
+            e.preventDefault();
+            const nama = document.getElementById('reg-nama').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const role = document.getElementById('reg-role').value;
+
+            const result = await DataService.register({ nama, email, password, role });
+            if (result.success) {
+                showAuthAlert('Akun berhasil dibuat! Mengalihkan ke Dashboard...', false);
+                setTimeout(() => { window.location.href = 'index.html'; }, 500);
+            } else {
+                showAuthAlert(result.message || 'Gagal mendaftarkan akun.', true);
+            }
+        }
+
+        async function quickDemoLogin() {
+            document.getElementById('login-email').value = 'mahasiswa@financial.local';
+            document.getElementById('login-password').value = 'mahasiswa123';
+            const result = await DataService.login('mahasiswa@financial.local', 'mahasiswa123');
+            if (result.success) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            DataService.init();
+        });
+    </script>
+</body>
+</html>

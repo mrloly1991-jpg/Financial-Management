@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Financial Management - Pengelolaan & Edukasi Keuangan Interaktif</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="min-h-screen flex flex-col">
+    <!-- Top Header -->
+    <header class="bg-slate-900 text-white shadow-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 py-3.5 flex flex-wrap items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500 flex items-center justify-center font-black text-lg shadow">
+                    FM
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">Financial Management</h1>
+                    <p class="text-xs text-slate-400">Pengelolaan Arus Kas, Target Barang & Edukasi Finansial Interaktif</p>
+                </div>
+            </div>
+
+            <!-- Navigation Tabs -->
+            <nav class="flex flex-wrap items-center gap-1.5 bg-slate-800 p-1.5 rounded-xl">
+                <button data-tab="dashboard" onclick="switchTab('dashboard')" class="tab-btn active px-3.5 py-2 rounded-lg text-xs md:text-sm transition">
+                    📊 Dashboard Visual
+                </button>
+                <button data-tab="laporan" onclick="switchTab('laporan')" class="tab-btn px-3.5 py-2 rounded-lg text-xs md:text-sm text-slate-300 hover:text-white transition">
+                    📝 Riwayat & Laporan
+                </button>
+                <button data-tab="target" onclick="switchTab('target')" class="tab-btn px-3.5 py-2 rounded-lg text-xs md:text-sm text-slate-300 hover:text-white transition">
+                    🎯 Kalkulator Target Barang
+                </button>
+                <button data-tab="edukasi" onclick="switchTab('edukasi')" class="tab-btn px-3.5 py-2 rounded-lg text-xs md:text-sm text-slate-300 hover:text-white transition">
+                    🎓 Edukasi Interaktif
+                </button>
+            </nav>
+            <!-- Profil Pengguna & Tombol Login/Logout (Tabel `users` ERD) -->
+            <div class="flex items-center gap-3 bg-slate-800/90 px-3.5 py-2 rounded-xl border border-slate-700">
+                <div class="text-right">
+                    <div class="flex items-center justify-end gap-1.5">
+                        <span id="nav-user-name" class="text-xs font-bold text-white">Mahasiswa PTK 2025</span>
+                        <span id="nav-user-role" class="text-[10px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">user</span>
+                    </div>
+                    <p id="nav-user-email" class="text-[11px] text-slate-400">mahasiswa@financial.local</p>
+                </div>
+                <div class="flex items-center gap-1.5 border-l border-slate-700 pl-3">
+                    <button onclick="openAuthModal()" class="text-xs bg-blue-600 hover:bg-blue-700 text-white font-semibold px-2.5 py-1.5 rounded-lg transition" title="Buka Form Login / Register">
+                        Akun
+                    </button>
+                    <a href="login.html" onclick="handleLogoutClick(event)" class="text-xs bg-red-500/20 hover:bg-red-600 text-red-200 hover:text-white font-semibold px-2.5 py-1.5 rounded-lg transition">
+                        Keluar
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Global Period Filter Bar -->
+    <div class="bg-white border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-500">Filter Periode Laporan:</span>
+                <button data-period="harian" onclick="setPeriodFilter('harian')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                    Harian
+                </button>
+                <button data-period="mingguan" onclick="setPeriodFilter('mingguan')" class="period-btn px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                    Mingguan (7 Hari)
+                </button>
+                <button data-period="bulanan" onclick="setPeriodFilter('bulanan')" class="period-btn active px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">
+                    Bulanan
+                </button>
+                <input type="date" id="filter-date" value="2026-11-16" onchange="renderAll()" class="ml-2 text-xs border border-slate-300 rounded-lg px-2.5 py-1.5 text-slate-700">
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="switchTab('laporan')" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-3.5 py-2 rounded-lg transition">
+                    + Catat Pemasukan / Pengeluaran
+                </button>
+                <button onclick="resetAllSampleData()" class="text-xs text-slate-500 hover:text-slate-800 underline">
+                    Reset Data Contoh
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1 space-y-6">
+
+        <!-- TAB 1: DASHBOARD VISUAL -->
+        <section id="tab-dashboard" class="tab-section space-y-6">
+            <!-- Contextual Education Trigger Banner -->
+            <div id="contextual-edu-alerts" class="space-y-3"></div>
+
+            <!-- 4 Summary Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold uppercase text-slate-400">Saldo Bersih Periode Ini</p>
+                    <h2 id="card-balance" class="text-2xl font-extrabold text-slate-900 mt-1">Rp 0</h2>
+                    <span class="text-xs text-slate-500">Selisih pemasukan & pengeluaran</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold uppercase text-emerald-600">Total Pemasukan</p>
+                    <h2 id="card-income" class="text-2xl font-extrabold text-emerald-600 mt-1">Rp 0</h2>
+                    <span class="text-xs text-slate-500">Uang masuk tercatat</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold uppercase text-red-600">Total Pengeluaran</p>
+                    <h2 id="card-expense" class="text-2xl font-extrabold text-red-600 mt-1">Rp 0</h2>
+                    <span class="text-xs text-slate-500">Uang keluar & alokasi</span>
+                </div>
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <p class="text-xs font-semibold uppercase text-blue-600">Alokasi Tabungan</p>
+                    <h2 id="card-savings" class="text-2xl font-extrabold text-blue-600 mt-1">Rp 0</h2>
+                    <span class="text-xs text-slate-500">Pos tabungan & target barang</span>
+                </div>
+            </div>
+
+            <!-- Visual Diagrams: Cashflow & 50/30/20 Rule -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between mb-4">
+                        <div>
+                            <h3 class="font-bold text-slate-800">Diagram Arus Kas (Pemasukan vs Pengeluaran)</h3>
+                            <p class="text-xs text-slate-500">Berubah otomatis mengikuti filter Harian, Mingguan, atau Bulanan</p>
+                        </div>
+                    </div>
+                    <canvas id="cashflowChart" height="220"></canvas>
+                </div>
+
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="mb-4">
+                        <h3 class="font-bold text-slate-800">Diagram Alokasi Metode 50/30/20</h3>
+                        <p class="text-xs text-slate-500">Perbandingan proporsi pengeluaran aktual terhadap aturan ideal 50/30/20</p>
+                    </div>
+                    <div class="max-w-xs mx-auto">
+                        <canvas id="ruleChart" height="200"></canvas>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 mt-4 text-center text-xs">
+                        <div class="p-2 rounded-lg bg-blue-50 text-blue-800 font-semibold" id="badge-needs">50% Ideal</div>
+                        <div class="p-2 rounded-lg bg-amber-50 text-amber-800 font-semibold" id="badge-wants">30% Ideal</div>
+                        <div class="p-2 rounded-lg bg-emerald-50 text-emerald-800 font-semibold" id="badge-savings">20% Ideal</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: PENCATATAN, RIWAYAT & LAPORAN MULTI-PERIODE -->
+        <section id="tab-laporan" class="tab-section hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Form Input Transaksi -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 h-fit">
+                    <h3 class="font-bold text-slate-800 text-lg mb-1">Catat Transaksi Keuangan</h3>
+                    <p class="text-xs text-slate-500 mb-4">Masukkan uang masuk atau uang keluar beserta kategori 50/30/20-nya.</p>
+
+                    <form id="tx-form" onsubmit="handleTransactionSubmit(event)" class="space-y-3.5">
+                        <input type="hidden" id="tx-id">
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal Transaksi</label>
+                            <input type="date" id="tx-date" value="2026-11-16" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Keterangan / Nama Transaksi</label>
+                            <input type="text" id="tx-title" placeholder="Contoh: Beli Buku / Uang Saku" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Jenis Arus Kas</label>
+                                <select id="tx-type" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                                    <option value="income">Pemasukan (+)</option>
+                                    <option value="expense" selected>Pengeluaran (-)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Pos Metode 50/30/20</label>
+                                <select id="tx-category" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                                    <option value="needs">Kebutuhan (50%)</option>
+                                    <option value="wants">Keinginan (30%)</option>
+                                    <option value="savings">Tabungan (20%)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal Uang (Rp)</label>
+                            <input type="number" id="tx-amount" min="1" placeholder="Contoh: 150000" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                        </div>
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="tx-submit-btn" class="flex-1 bg-slate-900 hover:bg-slate-800 text-white font-semibold py-2.5 rounded-xl text-sm transition">
+                                + Simpan Transaksi
+                            </button>
+                            <button type="button" onclick="resetTransactionForm()" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-xl text-xs font-semibold">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tabel Riwayat & Laporan -->
+                <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-lg">Laporan & Riwayat Transaksi</h3>
+                            <p class="text-xs text-slate-500">Menampilkan rincian uang masuk dan keluar sesuai periode aktif</p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <input type="text" id="search-tx" oninput="renderTransactionsTable()" placeholder="Cari riwayat..." class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs">
+                            <select id="filter-type" onchange="renderTransactionsTable()" class="border border-slate-300 rounded-xl px-3 py-1.5 text-xs">
+                                <option value="all">Semua Jenis</option>
+                                <option value="income">Hanya Pemasukan</option>
+                                <option value="expense">Hanya Pengeluaran</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Ringkasan Laporan Periode -->
+                    <div class="grid grid-cols-3 gap-3 bg-slate-50 p-3.5 rounded-xl border border-slate-200 text-center">
+                        <div>
+                            <span class="text-xs text-slate-500 block">Total Masuk</span>
+                            <strong id="report-summary-in" class="text-sm md:text-base text-emerald-600">Rp 0</strong>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 block">Total Keluar</span>
+                            <strong id="report-summary-out" class="text-sm md:text-base text-red-600">Rp 0</strong>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-500 block">Selisih Bersih</span>
+                            <strong id="report-summary-net" class="text-sm md:text-base text-slate-900">Rp 0</strong>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-xs uppercase text-slate-400">
+                                    <th class="py-3 px-4">Tanggal</th>
+                                    <th class="py-3 px-4">Keterangan</th>
+                                    <th class="py-3 px-4">Jenis</th>
+                                    <th class="py-3 px-4">Kategori 50/30/20</th>
+                                    <th class="py-3 px-4">Nominal</th>
+                                    <th class="py-3 px-4 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tx-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: KALKULATOR TARGET BARANG & TABUNGAN -->
+        <section id="tab-target" class="tab-section hidden space-y-6">
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 text-lg">Kalkulator Estimasi Target Barang & Tabungan Harian</h3>
+                <p class="text-xs text-slate-500 mb-4">Hitung berapa hari tenggat waktu dan berapa nominal uang yang wajib disisihkan setiap hari untuk membeli barang impian Anda.</p>
+
+                <form id="goal-form" onsubmit="handleGoalSubmit(event)" class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Barang / Tujuan</label>
+                        <input type="text" id="goal-name" placeholder="Contoh: Smartphone / Sepatu" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Harga Barang (Rp)</label>
+                        <input type="number" id="goal-target" min="1000" value="3000000" oninput="calculateLiveGoalPreview()" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tabungan Saat Ini (Rp)</label>
+                        <input type="number" id="goal-current" min="0" value="500000" oninput="calculateLiveGoalPreview()" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tenggat Waktu Target</label>
+                        <div class="flex gap-1.5">
+                            <input type="number" id="goal-duration" min="1" value="2" oninput="calculateLiveGoalPreview()" required class="w-20 border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                            <select id="goal-unit" onchange="calculateLiveGoalPreview()" class="flex-1 border border-slate-300 rounded-xl px-2.5 py-2 text-sm">
+                                <option value="hari">Hari</option>
+                                <option value="minggu">Minggu</option>
+                                <option value="bulan" selected>Bulan</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5 px-4 rounded-xl text-sm transition">
+                            + Tambah Target Barang
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Hasil Estimasi Instan -->
+                <div class="mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200 flex flex-wrap items-center justify-between gap-4">
+                    <div class="text-xs md:text-sm text-emerald-950">
+                        <span class="font-semibold">Hasil Kalkulasi Estimasi:</span> Untuk mencapai target dalam <strong id="goal-preview-days">60 Hari</strong>, Anda perlu menyisihkan uang sebesar:
+                    </div>
+                    <div id="goal-preview-daily" class="text-lg md:text-xl font-black text-emerald-700">
+                        Rp 41.667 / hari
+                    </div>
+                </div>
+            </div>
+
+            <!-- Daftar Target Barang Aktif -->
+            <div id="goals-container" class="grid grid-cols-1 md:grid-cols-2 gap-6"></div>
+        </section>
+
+        <!-- TAB 4: PUSAT EDUKASI KEUANGAN INTERAKTIF -->
+        <section id="tab-edukasi" class="tab-section hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 1. Simulator Anggaran Interaktif -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase px-2.5 py-1 rounded bg-blue-100 text-blue-800">Laboratorium Simulasi</span>
+                        <h3 class="font-bold text-slate-800 text-lg mt-2">Simulator Interaktif Metode 50/30/20</h3>
+                        <p class="text-xs text-slate-500">Geser slider di bawah untuk mempraktikkan pembagian uang bulanan Anda secara langsung.</p>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Masukkan Simulasi Pemasukan Bulanan (Rp)</label>
+                        <input type="number" id="sim-income" value="4000000" oninput="updateInteractiveSimulator()" class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm font-bold">
+                    </div>
+
+                    <div class="space-y-3">
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span>Kebutuhan Pokok (Ideal: 50%)</span>
+                                <span id="sim-label-needs" class="text-blue-600">50%</span>
+                            </div>
+                            <input type="range" id="sim-slider-needs" min="10" max="80" value="50" oninput="updateInteractiveSimulator()" class="w-full">
+                            <p id="sim-val-needs" class="text-xs font-bold text-slate-700">Rp 2.000.000</p>
+                        </div>
+
+                        <div>
+                            <div class="flex justify-between text-xs font-semibold mb-1">
+                                <span>Keinginan & Gaya Hidup (Ideal: 30%)</span>
+                                <span id="sim-label-wants" class="text-amber-600">30%</span>
+                            </div>
+                            <input type="range" id="sim-slider-wants" min="0" max="70" value="30" oninput="updateInteractiveSimulator()" class="w-full">
+                            <p id="sim-val-wants" class="text-xs font-bold text-slate-700">Rp 1.200.000</p>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200 flex justify-between items-center">
+                            <div>
+                                <span class="text-xs font-semibold text-slate-600 block">Otomatis Porsi Tabungan (Ideal: 20%)</span>
+                                <strong id="sim-label-savings" class="text-emerald-600 text-sm">20%</strong>
+                            </div>
+                            <strong id="sim-val-savings" class="text-base font-extrabold text-emerald-600">Rp 800.000</strong>
+                        </div>
+                    </div>
+
+                    <div id="sim-feedback"></div>
+                </div>
+
+                <!-- 2. Studi Kasus Keputusan Finansial Interaktif -->
+                <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                    <div>
+                        <span class="text-xs font-bold uppercase px-2.5 py-1 rounded bg-amber-100 text-amber-800">Studi Kasus Nyata</span>
+                        <h3 class="font-bold text-slate-800 text-lg mt-2">Simulasi Pengambilan Keputusan Uang</h3>
+                        <p class="text-xs text-slate-500">Pilih tindakan yang akan Anda ambil dan lihat dampaknya terhadap ketahanan finansial Anda.</p>
+                    </div>
+
+                    <div class="p-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 space-y-2">
+                        <p><strong>Skenario:</strong> Hari ini Anda memiliki sisa uang Rp 600.000 untuk bertahan hidup 2 minggu ke depan. Tiba-tiba toko <em>online</em> favorit Anda menggelar <em>Flash Sale</em> sepatu impian seharga Rp 450.000 (diskon 50%). Apa yang Anda lakukan?</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <button onclick="chooseCaseStudy('A')" class="p-3.5 rounded-xl border-2 border-slate-200 hover:border-red-400 text-left transition">
+                            <span class="text-xs font-bold text-red-600 uppercase">Pilihan A</span>
+                            <p class="text-sm font-semibold text-slate-800 mt-1">Beli Sekarang Mumpung Diskon Besar</p>
+                        </button>
+                        <button onclick="chooseCaseStudy('B')" class="p-3.5 rounded-xl border-2 border-slate-200 hover:border-emerald-500 text-left transition">
+                            <span class="text-xs font-bold text-emerald-600 uppercase">Pilihan B</span>
+                            <p class="text-sm font-semibold text-slate-800 mt-1">Masukkan ke Kalkulator Target Barang & Tunda</p>
+                        </button>
+                    </div>
+
+                    <div id="case-study-result" class="hidden"></div>
+                </div>
+            </div>
+
+            <!-- 3. Kuis Literasi Finansial Interaktif -->
+            <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-200 space-y-4">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <span class="text-xs font-bold uppercase px-2.5 py-1 rounded bg-emerald-100 text-emerald-800">Evaluasi Pemahaman</span>
+                        <h3 class="font-bold text-slate-800 text-lg mt-2">Kuis Interaktif Literasi Keuangan</h3>
+                    </div>
+                    <span id="quiz-score-badge" class="px-3.5 py-1.5 rounded-full bg-slate-900 text-white text-xs font-bold">
+                        Skor Kuis: Belum Dijawab
+                    </span>
+                </div>
+
+                <div id="quiz-container" class="grid grid-cols-1 md:grid-cols-3 gap-4"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-8">
+        <div class="max-w-7xl mx-auto px-4 flex flex-wrap justify-between items-center text-xs text-slate-500 gap-2">
+            <span><strong>Financial Management Web</strong> — Tahap 1 (Prototipe Interaktif siap XAMPP)</span>
+            <span>Arsitektur DataService siap dihubungkan ke MySQL phpMyAdmin (Tahap 2)</span>
+        </div>
+    </footer>
+
+    <script src="js/dataService.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- MODAL LOGIN / REGISTER TERINTEGRASI (Memudahkan tes langsung di dalam halaman atau via login.html) -->
+    <div id="auth-modal" class="fixed inset-0 bg-slate-900/75 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-md w-full p-6 md:p-8 shadow-2xl border border-slate-200 relative">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-sm">&times;</button>
+            
+            <div class="flex items-center gap-2.5 mb-4">
+                <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white font-black flex items-center justify-center text-sm">FM</div>
+                <div>
+                    <h3 class="font-bold text-slate-900 text-base">Autentikasi Pengguna (Tabel `users`)</h3>
+                    <p class="text-xs text-slate-500">Masuk atau daftar akun baru sesuai struktur ERD</p>
+                </div>
+            </div>
+
+            <div class="flex bg-slate-100 p-1 rounded-xl mb-4">
+                <button id="modal-tab-login" onclick="switchModalAuthTab('login')" class="flex-1 py-2 text-xs font-bold rounded-lg bg-slate-900 text-white">Masuk (Login)</button>
+                <button id="modal-tab-register" onclick="switchModalAuthTab('register')" class="flex-1 py-2 text-xs font-bold rounded-lg text-slate-600">Daftar (Register)</button>
+            </div>
+
+            <div id="modal-auth-alert" class="hidden mb-3 p-3 rounded-xl text-xs font-semibold"></div>
+
+            <!-- Form Login Modal -->
+            <form id="modal-form-login" onsubmit="submitModalLogin(event)" class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Email</label>
+                    <input type="email" id="modal-login-email" value="mahasiswa@financial.local" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                    <input type="password" id="modal-login-password" value="mahasiswa123" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                    Masuk Sekarang
+                </button>
+            </form>
+
+            <!-- Form Register Modal -->
+            <form id="modal-form-register" onsubmit="submitModalRegister(event)" class="hidden space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nama Lengkap (`nama`)</label>
+                    <input type="text" id="modal-reg-nama" placeholder="Nama Mahasiswa / Pengguna" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Email (`email`)</label>
+                    <input type="email" id="modal-reg-email" placeholder="nama@email.com" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                </div>
+                <div class="grid grid-cols-2 gap-2.5">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Password</label>
+                        <input type="password" id="modal-reg-password" minlength="6" placeholder="Min. 6 karakter" required class="w-full border border-slate-300 rounded-xl px-3 py-2 text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Role (`role`)</label>
+                        <select id="modal-reg-role" class="w-full border border-slate-300 rounded-xl px-2.5 py-2 text-sm">
+                            <option value="user">user</option>
+                            <option value="admin">admin</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-2.5 rounded-xl text-sm transition">
+                    Daftar & Gunakan Akun
+                </button>
+            </form>
+
+            <div class="mt-4 pt-3 border-t border-slate-100 flex justify-between items-center text-xs text-slate-500">
+                <span>Halaman penuh: <a href="login.html" class="text-blue-600 font-semibold hover:underline">Buka login.html</a></span>
+                <button onclick="closeAuthModal()" class="text-slate-500 hover:text-slate-800">Tutup</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+/* Custom Styles for Financial Management Web */
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #F8FAFC;
+    color: #0F172A;
+}
+
+.tab-btn.active {
+    background-color: #1E293B;
+    color: #FFFFFF;
+    font-weight: 600;
+}
+
+.period-btn.active {
+    background-color: #3B82F6;
+    color: #FFFFFF;
+}
+
+input[type="range"] {
+    accent-color: #3B82F6;
+}
